@@ -22,7 +22,7 @@ if st.button('Show Ticker List'):
     st.write(tickers)
 
 st.subheader('Enter the company name')
-names = [x for x in st.text_input('Enter the company name').split()]
+names = [x.upper() for x in st.text_input('Enter the company name').split()]
 # names = [x for x in input("enter the stock names").split()]
 check =  all(item in tickers for item in names)
 if names == None:
@@ -109,24 +109,44 @@ for i in range(len(names)):
     dic = get_fund(soup_beforelogin, soup_afterlogin)
     if i==0:
         df = pd.DataFrame([dic])
+        df.loc[i,'Company Name'] = names[i]
     else:
         df.loc[len(df.index)] = dic
+        df.loc[len(df.index)-1,'Company Name'] = names[i]
     pl = pl_n_years(soup_beforelogin,'profit-loss','data-table responsive-text-nowrap',3)
     if i == 0:
         pl_df = pd.DataFrame(pl,columns=['3 years ago','2 year ago','1 year ago'])
+        pl_df.loc[i,'Company Name'] = names[i]
         #print(pl_df)
     else:
         pl = pl.flatten()
         pl_df = pl_df.append(pd.Series(pl, index=pl_df.columns[:len(pl)]), ignore_index=True)
+        pl_df.loc[len(pl_df.index)-1,'Company Name'] = names[i]
+        pl_df.set_index('Company Name',inplace=True)
         #print(pl_df)
-for i in range(len(names)):
-    df.loc[i,'Company Name'] = names[i]
+df = df.set_index('Company Name')
 # print(df ,pl_df, sep = '\n')
 st.write(df,'\n')
 st.write(pl_df)
 
 st.subheader('Analysing the Market Cap')
-fig = plt.figure(figsize=(10, 4))
+fig = plt.figure(figsize=(15,5))
 st.set_option('deprecation.showPyplotGlobalUse', False)
-sns.barplot(x=df['Market Cap'], y=df['Company Name'], palette='rocket', data=df, ).set_title('Market Cap', fontsize=20)
+plt.subplot(1,3,1)
+sns.barplot(y=df['Market Cap'], x=df.index, palette='rocket', data=df, ).set_title('Market Cap', fontsize=20)
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+plt.subplot(1,3,2)
+sns.barplot(y=df['Stock P/E'], x=df.index, palette='rocket', data=df, ).set_title('P/E', fontsize=20)
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+plt.subplot(1,3,3)
+bar1 = np.arange(len(df))
+bar2 = [i+0.2 for i in bar1]
+plt.bar(bar1,df['ROE'], width=0.2, label='ROE')
+plt.bar(bar2, df['ROCE'], width=0.2, label='ROCE')
+plt.xlabel('Company Name')
+plt.ylabel('ROE and ROCE')
+plt.title('ROE and ROCE')
+plt.legend(['ROE','ROCE'])
 st.pyplot(fig)

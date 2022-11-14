@@ -11,7 +11,7 @@ tickers = pd.read_html('https://indiancompanies.in/listed-companies-in-nse-with-
 tickers.columns = tickers.iloc[0]
 tickers = tickers.iloc[1:,:]
 tickers = list(tickers.SYMBOL)
-names = [x for x in input("enter the stock names").split()]
+names = [x.upper() for x in input("enter the stock names").split()]
 print(names)
 fundamentals = {}
 
@@ -90,17 +90,21 @@ for i in range(len(names)):
     dic = get_fund(soup_beforelogin, soup_afterlogin)
     if i==0:
         df = pd.DataFrame([dic])
+        df.loc[i,'Company Name'] = names[i]
     else:
         df.loc[len(df.index)] = dic
+        df.loc[len(df.index)-1,'Company Name'] = names[i]
     pl = pl_n_years(soup_beforelogin,'profit-loss','data-table responsive-text-nowrap',3)
     if i == 0:
         pl_df = pd.DataFrame(pl,columns=['3 years ago','2 year ago','1 year ago'])
+        pl_df.loc[i,'Company Name'] = names[i]
         #print(pl_df)
     else:
         pl = pl.flatten()
         pl_df = pl_df.append(pd.Series(pl, index=pl_df.columns[:len(pl)]), ignore_index=True)
+        pl_df.loc[len(pl_df.index)-1,'Company Name'] = names[i]
+        pl_df.set_index('Company Name',inplace=True)
         #print(pl_df)
-for i in range(len(names)):
-    df.loc[i,'Company'] = names[i]
-
+df = df.set_index('Company Name')
 print(df,sep = '\n')
+print(pl_df,sep = '\n')
