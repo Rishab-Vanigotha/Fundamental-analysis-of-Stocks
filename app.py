@@ -21,8 +21,10 @@ st.subheader('Ticker List')
 if st.button('Show Ticker List'):
     st.write(tickers)
 
+names = st.multiselect('Select Ticker', tickers)
 st.subheader('Enter the company name')
-names = [x.upper() for x in st.text_input('Enter the company name').split()]
+# names = [x.upper() for x in st.text_input('Enter the company name').split()]
+names = [x.upper() for x in names]
 # names = [x for x in input("enter the stock names").split()]
 check =  all(item in tickers for item in names)
 if names == None:
@@ -180,3 +182,7 @@ for i in range(len(pl_strategy)):
     else:
         pl_strategy.loc[i,'PL_strategy'] = "Hold"
 st.write(pl_strategy)
+
+fig1 = plt.figure(figsize=(10,5))
+sns.barplot(y = pl_strategy['Current Price'], x = pl_strategy['Company Name'], hue = pl_strategy['PL_strategy'], palette='rocket', data=pl_strategy, ).set_title('PL Strategy', fontsize=10)
+st.pyplot(fig1)
