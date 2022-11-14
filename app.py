@@ -122,7 +122,14 @@ for i in range(len(names)):
         pl = pl.flatten()
         pl_df = pl_df.append(pd.Series(pl, index=pl_df.columns[:len(pl)]), ignore_index=True)
         pl_df.loc[len(pl_df.index)-1,'Company Name'] = names[i]
-        pl_df.set_index('Company Name',inplace=True)
+pl_df.set_index('Company Name',inplace=True)
+for i in range(len(pl_df)):
+    for j in range(len(pl_df.columns)):
+        if pl_df.iloc[i,j] == '':
+            pl_df.iloc[i,j] = np.nan
+        else:
+            print(pl_df.iloc[i,j])
+            pl_df.iloc[i,j] = float(pl_df.iloc[i,j].replace(',',''))
         #print(pl_df)
 df = df.set_index('Company Name')
 # print(df ,pl_df, sep = '\n')
@@ -130,23 +137,46 @@ st.write(df,'\n')
 st.write(pl_df)
 
 st.subheader('Analysing the Market Cap')
-fig = plt.figure(figsize=(15,5))
+fig = plt.figure(figsize=(15,10))
 st.set_option('deprecation.showPyplotGlobalUse', False)
-plt.subplot(1,3,1)
+plt.subplot(2,2,1)
 sns.barplot(y=df['Market Cap'], x=df.index, palette='rocket', data=df, ).set_title('Market Cap', fontsize=20)
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-plt.subplot(1,3,2)
+plt.subplot(2,2,2)
 sns.barplot(y=df['Stock P/E'], x=df.index, palette='rocket', data=df, ).set_title('P/E', fontsize=20)
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-plt.subplot(1,3,3)
+plt.subplot(2,2,3)
 bar1 = np.arange(len(df))
 bar2 = [i+0.2 for i in bar1]
 plt.bar(bar1,df['ROE'], width=0.2, label='ROE')
 plt.bar(bar2, df['ROCE'], width=0.2, label='ROCE')
 plt.xlabel('Company Name')
+plt.xticks(bar1+0.1, df.index)
 plt.ylabel('ROE and ROCE')
 plt.title('ROE and ROCE')
 plt.legend(['ROE','ROCE'])
+
+plt.subplot(2,2,4)
+bar1 = np.arange(len(pl_df))
+bar2 = [i+0.2 for i in bar1]
+bar3 = [i+0.4 for i in bar1]
+plt.bar(bar1,pl_df['3 years ago'], width=0.2, label='3 years ago')
+plt.bar(bar2, pl_df['2 year ago'], width=0.2, label='2 year ago')
+plt.bar(bar3, pl_df['1 year ago'], width=0.2, label='1 year ago')
+plt.xlabel('Company Name')
+plt.xticks(bar1+0.2, pl_df.index)
+plt.ylabel('Net Profit/Loss')
+plt.title('Net Profit/Loss')
+plt.legend()
+plt.subplot(2,2,4)
+# sns.barplot(y=pl_df['3 years ago'], x=pl_df.index, palette='rocket', data=pl_df, ).set_title('Net Profit/Loss 3 years ago', fontsize=20)
 st.pyplot(fig)
+
+pl_strategy = df[['Current Price','High price']]
+pl_strategy.reset_index(inplace=True)
+for i in range(len(pl_strategy)):
+    if (pl_strategy['High price'][i] - 0.1*pl_strategy['High price'][i]) > pl_strategy['Current Price'][i]:
+        pl_strategy.loc[i,'PL_strategy'] = "Buy"
+    else:
+        pl_strategy.loc[i,'PL_strategy'] = "Hold"
+st.write(pl_strategy)

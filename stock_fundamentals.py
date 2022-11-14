@@ -103,8 +103,24 @@ for i in range(len(names)):
         pl = pl.flatten()
         pl_df = pl_df.append(pd.Series(pl, index=pl_df.columns[:len(pl)]), ignore_index=True)
         pl_df.loc[len(pl_df.index)-1,'Company Name'] = names[i]
-        pl_df.set_index('Company Name',inplace=True)
+pl_df.set_index('Company Name',inplace=True)
+for i in range(len(pl_df)):
+    for j in range(len(pl_df.columns)):
+        if pl_df.iloc[i,j] == '':
+            pl_df.iloc[i,j] = np.nan
+        else:
+            print(pl_df.iloc[i,j])
+            pl_df.iloc[i,j] = float(pl_df.iloc[i,j].replace(',',''))
         #print(pl_df)
 df = df.set_index('Company Name')
 print(df,sep = '\n')
 print(pl_df,sep = '\n')
+
+pl_strategy = df[['Current Price','High price']]
+pl_strategy.reset_index(inplace=True)
+for i in range(len(pl_strategy)):
+    if (pl_strategy['High price'][i] - 0.1*pl_strategy['High price'][i]) > pl_strategy['Current Price'][i]:
+        pl_strategy.loc[i,'PL_strategy'] = "Buy"
+    else:
+        pl_strategy.loc[i,'PL_strategy'] = "Hold"
+print(pl_strategy)
