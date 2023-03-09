@@ -2,3 +2,4 @@ matplotlib
 seaborn
 streamlit
 bs4
+lxml
