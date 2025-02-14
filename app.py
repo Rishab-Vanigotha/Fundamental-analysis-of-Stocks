@@ -43,7 +43,7 @@ s=requests.session()
 csrf = s.get(ori+login_route).cookies['csrftoken']
 payload = {
         'username': 'jainamjain1480@gmail.com',
-        'password': 'Ggaknrkr@123',
+        'password': '*******',
         'csrfmiddlewaretoken': csrf
     }
 login_req = s.post(ori+login_route,headers=header,data=payload)
